@@ -1,0 +1,88 @@
+import requests
+import getpass
+import browser_cookie3
+from colorama import Fore, Style, init
+
+# Initialisation de colorama
+init(autoreset=True)
+
+# Logo ASCII et informations avec couleurs
+logo = f"""
+{Fore.CYAN}  _____       _        _     _           
+{Fore.CYAN} |  ___|_   _| |_ __ _| |__ | | ___  ___ 
+{Fore.CYAN} | |_  | | | | __/ _` | '_ \| |/ _ \/ __|
+{Fore.CYAN} |  _| | |_| | || (_| | |_) | |  __/\__ \\
+{Fore.CYAN} |_|    \__,_|\__\__,_|_.__/|_|\___||___/
+                                         
+"""
+print(logo)
+print(f"{Fore.GREEN}Créé par : Votre Nom")
+print(f"{Fore.GREEN}Version : 1.0.0")
+print(f"{Fore.GREEN}Description : Un outil interactif pour accéder à Facebook via Termux.\n")
+
+# Demande les informations de connexion à l'utilisateur
+username = input(f"{Fore.YELLOW}Entrez votre numéro de téléphone ou adresse e-mail : ")
+password = getpass.getpass(f"{Fore.YELLOW}Entrez votre mot de passe : ")
+
+# URL de connexion de Facebook
+login_url = 'https://m.facebook.com/login.php'
+
+# Données de connexion
+login_data = {
+    'email': username,
+    'pass': password
+}
+
+# Session requests
+session = requests.Session()
+
+# Tentative de connexion
+try:
+    response = session.post(login_url, data=login_data)
+    if "c_user" in session.cookies:
+        print(f"{Fore.GREEN}Connecté avec succès à Facebook.")
+    else:
+        print(f"{Fore.RED}Erreur lors de la connexion à Facebook. Vérifiez votre nom d'utilisateur et mot de passe.")
+        exit()
+except Exception as e:
+    print(f"{Fore.RED}Erreur lors de la connexion à Facebook:", e)
+    exit()
+
+# Fonction pour afficher les cookies
+def afficher_cookies():
+    cookies = session.cookies.get_dict()
+    print(f"{Fore.CYAN}Cookies de session :")
+    for key, value in cookies.items():
+        print(f"{Fore.CYAN}{key}: {value}")
+
+# Fonction pour afficher les messages (exemple simplifié)
+def afficher_messages():
+    try:
+        messages_url = 'https://m.facebook.com/messages'
+        response = session.get(messages_url)
+        # Analyse de la réponse pour extraire les messages
+        # (à implémenter en fonction du format de la page)
+        print(f"{Fore.CYAN}Messages récupérés (exemple simplifié):")
+        print(response.text[:1000])  # Affiche les premiers 1000 caractères de la réponse
+    except Exception as e:
+        print(f"{Fore.RED}Erreur lors de la récupération des messages:", e)
+
+# Menu interactif
+while True:
+    print(f"\n{Fore.BLUE}Choisissez une option :")
+    print(f"{Fore.BLUE}1. Voir les cookies de session")
+    print(f"{Fore.BLUE}2. Voir les messages (exemple simplifié)")
+    print(f"{Fore.BLUE}3. Quitter")
+
+    choix = input(f"{Fore.YELLOW}Entrez votre choix : ")
+
+    if choix == '1':
+        afficher_cookies()
+    elif choix == '2':
+        afficher_messages()
+    elif choix == '3':
+        print(f"{Fore.GREEN}Déconnexion...")
+        session.close()
+        break
+    else:
+        print(f"{Fore.RED}Choix invalide. Veuillez réessayer.")
